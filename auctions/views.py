@@ -3,12 +3,25 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 from .models import User
 
 
 def index(request):
     return render(request, "auctions/index.html")
+
+@login_required
+def watchlist(request):
+    return render(request, "auctions/watchlist.html")
+
+@login_required
+def add_listing(request):
+    return render(request, "auctions/add_listing.html")
+
+@login_required
+def categories(request):
+    return render(request, "auctions/categories.html")
 
 
 def login_view(request):
