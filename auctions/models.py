@@ -32,7 +32,7 @@ class Listing(models.Model):
 
     description = models.TextField(max_length=500)
 
-    photo = models.ImageField(upload_to="listing_mages/", blank=True, null=True)
+    photo = models.ImageField(default="error.png", blank=True)
 
     # current price should be based on Bid Class
     first_price = models.DecimalField(max_digits=10, decimal_places=2)

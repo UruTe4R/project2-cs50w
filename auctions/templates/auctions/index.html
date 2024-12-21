@@ -3,5 +3,23 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-    TODO
+    {% for listing in listings %}
+        <div class="container">
+            <div class="image-container">
+                <img src="{{ listing.photo.url }}" alt="{{listing.title}}">
+            </div>
+            <div class="right_container">
+                <div class="details">
+                    <h2>{{ listing.title }}</h2>
+                    <h3>
+                        Price: {{ listing.price }}
+                    </h3>
+
+                    <div class="date">{{ listing.creation_date }}</div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        currently no listings
+    {% endfor %}
 {% endblock %}

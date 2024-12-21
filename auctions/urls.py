@@ -1,4 +1,6 @@
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from . import views
 
@@ -11,3 +13,5 @@ urlpatterns = [
     path("add_listing", views.add_listing, name="add_listing"),
     path("categories", views.categories, name="categories"),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

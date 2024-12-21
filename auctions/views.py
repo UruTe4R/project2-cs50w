@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django import forms
+from PIL import Image
 
 from .models import User, Listing, Bid, Comment, Reply
 
@@ -14,10 +15,25 @@ class Listing_form(forms.ModelForm):
         fields = ['title', 'description', 'photo', 'first_price']
 
         first_price = forms.DecimalField(max_digits=10, decimal_places=2)
+    def clean_photo(self):
+        photo = self.cleaned_data["photo"]
+        img = Image.open(photo)
+        max_width, max_height = 500, 500
+        img.thumbnail((max_width, max_height), Image.ANTIALIAS)
+        img.save(photo, format=img.format)
+
+        return photo
+
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    if request.method == "POST":
+        ...
+    else:
+        listings = Listing.objects.all()
+        return render(request, "auctions/index.html", {
+            "listings": listings
+        })
 
 @login_required
 def watchlist(request):
@@ -37,7 +53,7 @@ def add_listing(request):
         listing.owner = request.user
         listing.save()
 
-        return(request, "auctins/index.html", { **form.cleaned_data
+        return render(request, "auctions/index.html", { **form.cleaned_data
 
         })
     else:
