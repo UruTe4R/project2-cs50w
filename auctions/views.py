@@ -4,8 +4,16 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django import forms
 
-from .models import User
+from .models import User, Listing, Bid, Comment, Reply
+
+class Listing_form(forms.ModelForm):
+    class Meta():
+        model =  Listing
+        fields = ['title', 'description', 'photo', 'first_price']
+
+        first_price = forms.DecimalField(max_digits=10, decimal_places=2)
 
 
 def index(request):
@@ -17,7 +25,26 @@ def watchlist(request):
 
 @login_required
 def add_listing(request):
-    return render(request, "auctions/add_listing.html")
+    if request.method == "POST":
+        form = Listing_form(request.POST)
+        # is form valid?
+        if not form.is_valid():
+            return render(request, "auctions/add_listing.html", {
+                "form": form
+            })
+        #save to database, w/owner
+        listing = form.save(commit=False)
+        listing.owner = request.user
+        listing.save()
+
+        return(request, "auctins/index.html", { **form.cleaned_data
+
+        })
+    else:
+        listing_form = Listing_form()
+        return render(request, "auctions/add_listing.html", {
+            "form": listing_form
+        })
 
 @login_required
 def categories(request):
