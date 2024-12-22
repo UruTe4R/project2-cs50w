@@ -7,12 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django import forms
 from PIL import Image
 
-from .models import User, Listing, Bid, Comment, Reply
+from .models import User, Listing, Bid, Comment, Reply, Categories
 
 class Listing_form(forms.ModelForm):
     class Meta():
         model =  Listing
-        fields = ['title', 'description', 'photo', 'first_price']
+        fields = ['title', 'description', 'photo', 'first_price', 'category_name']
 
         first_price = forms.DecimalField(max_digits=10, decimal_places=2)
     def clean_photo(self):
