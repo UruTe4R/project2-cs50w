@@ -45,7 +45,7 @@ class ListingForm(forms.ModelForm):
         img = Image.open(uploaded_file)
 
         # set the resizing width and height
-        max_width, max_height = 500, 500
+        max_width, max_height = 500, 300
 
         origina_width, original_height = img.size
         # resize image if it's larger than the max size
