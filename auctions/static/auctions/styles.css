@@ -1,3 +1,32 @@
 body {
     padding: 10px;
 }
+.container {
+    display: flex;             /* Flex container to align elements side by side */
+    flex-direction: row;       /* Ensures image and content are placed horizontally */
+    gap: 20px;                 /* Optional: Adds space between the image and content */
+    align-items: flex-start;   /* Aligns items to the top of the container */
+}
+
+.image-container {
+    max-width: 50%;            /* You can adjust this to control the width of the image */
+    min-width: 200px;          /* Prevents the image from getting too small */
+}
+
+.right_container {
+    max-width: 50%;            /* You can adjust this to control the width of the content */
+    flex-grow: 1;              /* Ensures the right side grows as needed */
+}
+
+img {
+    width: 100%;               /* Ensures the image takes up the full width of its container */
+    height: auto;              /* Maintains the image aspect ratio */
+}
+
+.details {
+    padding: 10px;             /* Optional: Adds some space around the details */
+}
+
+h2, h3 {
+    margin: 0 0 10px 0;        /* Optional: Adds spacing between title and other details */
+}

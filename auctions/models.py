@@ -28,6 +28,9 @@ class Bid(models.Model):
 class Categories(models.Model):
     category = models.CharField(default="Else", max_length=64, unique=True)
 
+    def __str__(self):
+        return f"{self.category}"
+
 class Listing(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owner')
 
@@ -35,7 +38,9 @@ class Listing(models.Model):
 
     description = models.TextField(max_length=500)
 
-    photo = models.ImageField(default="error.png", blank=True)
+    image_path = models.ImageField(default="error.png", blank=True)
+
+    image_URL = models.URLField(blank=True)
 
     # current price should be based on Bid Class
     first_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -43,6 +48,9 @@ class Listing(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
 
     category_name = models.ForeignKey(Categories, on_delete=models.CASCADE, related_name="category_name", null=True)
+
+    def __str__(self):
+        return f"{self.title} by {self.owner}"
 
 class Comment(models.Model):
     # who, what comment, when
@@ -52,11 +60,19 @@ class Comment(models.Model):
 
     comment_date = models.DateTimeField(auto_now_add=True)
 
-class Reply(models.Model):
-    what_comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='what_comment')
+    listing_id = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="listing_id")
 
-    reponder = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reponder')
+    def __str__(self):
+        return f"{self.writer} | {self.comment[:20]}... at {self.comment_date}"
+
+class Reply(models.Model):
+    comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='what_comment')
+
+    responder = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reponder')
 
     response = models.TextField(max_length=500)
 
     response_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"To {self.comment_id.writer}, {self.responder} '{self.response}'"
