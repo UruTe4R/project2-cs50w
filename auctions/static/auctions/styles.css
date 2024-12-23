@@ -1,32 +1,68 @@
-body {
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: content-box;
+}
+
+.body {
+    display: flex;
+    justify-content: center; 
+    align-items: center;   
+    height: 100%;        
     padding: 10px;
+    margin: 0;
+    flex-direction: column;
+}
+a{
+    display: inline-block;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 10px;
+}
+a:hover{
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    text-decoration: none;
 }
 .container {
-    display: flex;             /* Flex container to align elements side by side */
-    flex-direction: row;       /* Ensures image and content are placed horizontally */
-    gap: 20px;                 /* Optional: Adds space between the image and content */
-    align-items: flex-start;   /* Aligns items to the top of the container */
+    height: 300px;
+    width: 1200px;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+    border: 2px solid black;
+    border-radius: 10px;
 }
 
 .image-container {
-    max-width: 50%;            /* You can adjust this to control the width of the image */
-    min-width: 200px;          /* Prevents the image from getting too small */
-}
+    width: 500px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-.right_container {
-    max-width: 50%;            /* You can adjust this to control the width of the content */
-    flex-grow: 1;              /* Ensures the right side grows as needed */
+    border-right: 2px solid black;
 }
 
 img {
-    width: 100%;               /* Ensures the image takes up the full width of its container */
-    height: auto;              /* Maintains the image aspect ratio */
+    border-radius: 10px;
+}
+
+.right_container {
+    max-width: ;
+    flex-grow: 1;
+    text-decoration: none;
+    color: black;
+}
+
+img {
+    height: 300px;
 }
 
 .details {
-    padding: 10px;             /* Optional: Adds some space around the details */
+    padding: 10px;
 }
 
 h2, h3 {
-    margin: 0 0 10px 0;        /* Optional: Adds spacing between title and other details */
+    margin: 0 0 10px 0;
 }

@@ -21,6 +21,7 @@ from .models import User, Listing, Bid, Comment, Reply, Categories
 CSSもうまいこと行かないからそこもどうにかしないと。。。
     2024-12-23
     image upload worked. with enctype attribute
+    need to see if add image with url
 """
 
 class ListingForm(forms.ModelForm):
@@ -77,7 +78,6 @@ class ListingForm(forms.ModelForm):
 
 
 
-
 def index(request):
     if request.method == "POST":
         ...
@@ -86,6 +86,16 @@ def index(request):
         return render(request, "auctions/index.html", {
             "listings": listings
         })
+
+@login_required
+def listing(request, listing_id):
+    if (listing := Listing.objects.get(pk=listing_id)):
+        
+        return render(request, f"auctions/listing.html", {
+            "listing": listing
+        })
+    else:
+        return HttpResponseRedirect(reverse("index"))
 
 @login_required
 def watchlist(request):
