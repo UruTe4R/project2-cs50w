@@ -13,9 +13,7 @@ urlpatterns = [
     path("add_listing", views.add_listing, name="add_listing"),
     path("categories", views.categories, name="categories"),
     path("listing/<int:listing_id>", views.listing, name="listing"),
+    path("watchlist/toggle/<int:listing_id>", views.add_watchlist, name="toggle_watchlist")
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

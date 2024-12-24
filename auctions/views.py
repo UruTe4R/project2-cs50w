@@ -15,18 +15,27 @@ import os
 
 from .models import User, Listing, Bid, Comment, Reply, Categories
 
-""" 2024-12-22 一旦ここで色んな動画を見あさろうと思う。まだgitにセーブしていない
-画像をテーブルに保存したいが、保存されるのが毎度error.pngになる。なぜか？
-一度画像のサイズを既定のサイズに変える関数を消したがどこかに導入したい。
-CSSもうまいこと行かないからそこもどうにかしないと。。。
+""" 
+    2024-12-22 一旦ここで色んな動画を見あさろうと思う。まだgitにセーブしていない
+    画像をテーブルに保存したいが、保存されるのが毎度error.pngになる。なぜか？
+    一度画像のサイズを既定のサイズに変える関数を消したがどこかに導入したい。
+    CSSもうまいこと行かないからそこもどうにかしないと。。。
+
     2024-12-23
     image upload worked. with enctype attribute
-    need to see if add image with url
+    need to see if works with add image from url
+    created "watchlist" field to User class
+    CSS to index.html
+
+    2024-12-24
+    start from watchlist implementation!
 """
+
+
 
 class ListingForm(forms.ModelForm):
     class Meta:
-        model =  Listing
+        model = Listing
         fields = ['title', 'description', 'image_path', 'image_URL', 'first_price', 'category_name']
         # set labels
         labels= {"first_price": "Starting Price($)",
@@ -35,6 +44,15 @@ class ListingForm(forms.ModelForm):
                  }
 
         first_price = forms.DecimalField(max_digits=10, decimal_places=2)
+
+    def clean_first_price(self):
+        """
+        check if price is positive
+        """
+        price = self.cleaned_data["first_price"]
+        if price < 0:
+            raise forms.ValidationError("Price must be positive value.")
+        return price
     
     def clean_image_path(self):
         print("clean_image_path called")
@@ -82,20 +100,52 @@ def index(request):
     if request.method == "POST":
         ...
     else:
-        listings = Listing.objects.all()
+        # get all listings and order by creation date desc with "-"
+        listings = Listing.objects.all().order_by("-creation_date")
         return render(request, "auctions/index.html", {
             "listings": listings
         })
 
 @login_required
+def add_watchlist(request, listing_id):
+    # POST
+    if request.method == "POST":
+        listing = Listing.objects.get(pk=listing_id)
+        if request.user.watchlist.filter(pk=listing_id).exists():
+            request.user.watchlist.remove(listing)
+        else:
+            request.user.watchlist.add(listing)
+        return HttpResponseRedirect(reverse("listing", args=[listing_id]))
+            
+    # GET
+    # else:
+    #     listing = Listing.objects.get(pk=listing_id)
+    #     if request.user.watchlist.filter(pk=listing_id).exists():
+    #         return render(request, "auctions/listing.html", {
+    #             "listing_presence": True,
+    #             "listing": listing
+    #         })
+    #     else:
+    #         return render(request, "auctions/listing.html", {
+    #             "listing_presence": False,
+    #             "listing": listing
+    #         })
+
+
+
+@login_required
 def listing(request, listing_id):
-    if (listing := Listing.objects.get(pk=listing_id)):
-        
-        return render(request, f"auctions/listing.html", {
-            "listing": listing
-        })
+    if request.method == "POST":
+        ...
     else:
-        return HttpResponseRedirect(reverse("index"))
+        if (listing := Listing.objects.get(pk=listing_id)):
+            listing_presence = request.user.watchlist.filter(pk=listing_id).exists()
+            return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "listing_presence": listing_presence
+            })
+        else:
+            return HttpResponseRedirect(reverse("index"))
 
 @login_required
 def watchlist(request):

@@ -1,5 +1,16 @@
 {% extends 'auctions/layout.html' %}
 
 {% block body %}
-  {{ listing.title }}
+  <h1>Listing: {{ listing.title }}</h1>
+  <form action="{% url 'toggle_watchlist' listing_id=listing.id%}" method="post">
+    {% csrf_token %}
+    {% if listing_presence %}
+      <input class="listing_on watchlist_button" type="submit" value="Watchlist">
+      <p>added</p>
+    {% else %}
+      <input class="listing_off watchlist_button" type="submit" value="Watchlist">
+      <p>removed</p>
+    {% endif %}
+    </form>
+
 {% endblock %}

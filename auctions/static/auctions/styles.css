@@ -46,6 +46,7 @@ a:hover{
 
 img {
     border-radius: 10px;
+    height: 300px;
 }
 
 .right_container {
@@ -55,14 +56,17 @@ img {
     color: black;
 }
 
-img {
-    height: 300px;
+.watchlist_button {
+    padding: 0 10px;
+    background-color: rgba(0, 0, 0, 0.5)
+    border: 2px solid black;
+    border-radius: 2px;
 }
 
-.details {
-    padding: 10px;
+.listing_on {
+    color: red;
 }
 
-h2, h3 {
-    margin: 0 0 10px 0;
+.listing_off {
+    color: black;
 }
