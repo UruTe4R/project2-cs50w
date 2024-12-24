@@ -29,6 +29,12 @@ from .models import User, Listing, Bid, Comment, Reply, Categories
 
     2024-12-24
     start from watchlist implementation!
+    when accessing request.user, is_authenticated better be called <- NO!!
+    i forgot login_required decorator... 
+
+    finished listing's price in listing.html 
+    2025-12-25
+    implement listing especially bids
 """
 
 
@@ -102,9 +108,25 @@ def index(request):
     else:
         # get all listings and order by creation date desc with "-"
         listings = Listing.objects.all().order_by("-creation_date")
+        bids = Bid.objects.all().order_by("-bid_date")
+        if request.user.is_authenticated:
+            watchlist_count = request.user.watchlist.all().count()
+        else:
+            return HttpResponseRedirect(reverse("login"))
         return render(request, "auctions/index.html", {
-            "listings": listings
+            "listings": listings,
+            "bids": bids,
+            "watchlist_count": watchlist_count
         })
+
+@login_required
+def watchlist(request):
+    watchlist_count = request.user.watchlist.all().count()
+    watchlist = request.user.watchlist.all()
+    return render(request, "auctions/watchlist.html", {
+        "watchlist": watchlist,
+        "watchlist_count": watchlist_count
+    })
 
 @login_required
 def add_watchlist(request, listing_id):
@@ -116,7 +138,8 @@ def add_watchlist(request, listing_id):
         else:
             request.user.watchlist.add(listing)
         return HttpResponseRedirect(reverse("listing", args=[listing_id]))
-            
+    
+                
     # GET
     # else:
     #     listing = Listing.objects.get(pk=listing_id)
@@ -138,18 +161,25 @@ def listing(request, listing_id):
     if request.method == "POST":
         ...
     else:
-        if (listing := Listing.objects.get(pk=listing_id)):
+        
+        if (listing := Listing.objects.filter(pk=listing_id)):
+            listing = listing.first()
             listing_presence = request.user.watchlist.filter(pk=listing_id).exists()
+            watchlist_count = request.user.watchlist.all().count()
+            latest_bid = Bid.objects.filter(target_listing=listing).order_by("-bid_date").first()
+
             return render(request, "auctions/listing.html", {
                 "listing": listing,
-                "listing_presence": listing_presence
+                "listing_presence": listing_presence,
+                "watchlist_count": watchlist_count,
+                "latest_bid": latest_bid
             })
         else:
-            return HttpResponseRedirect(reverse("index"))
+            return render(request, "auctions/error.html", {
+                "code": 404,
+                "message": "not found"
+            })
 
-@login_required
-def watchlist(request):
-    return render(request, "auctions/watchlist.html")
 
 @login_required
 def add_listing(request):
@@ -159,23 +189,28 @@ def add_listing(request):
         # is form valid?
         if not form.is_valid():
             return render(request, "auctions/add_listing.html", {
-                "form": form
+                "form": form,
+                "watchlist_count": request.user.watchlist.all().count()
             })
         #save to database, w/owner
         listing = form.save(commit=False)
         listing.owner = request.user
         listing.save()
+        Bid.objects.create(target_listing=listing, bidder=request.user, first_bid=listing.first_price, current_bid=listing.first_price)
         print(f"Image path: {os.path.join(settings.MEDIA_ROOT, listing.image_path.name)}")
         return HttpResponseRedirect(reverse("index"))
     else:
         listing_form = ListingForm()
         return render(request, "auctions/add_listing.html", {
-            "form": listing_form
+            "form": listing_form,
+            "watchlist_count": request.user.watchlist.all().count()
         })
 
 @login_required
 def categories(request):
-    return render(request, "auctions/categories.html")
+    return render(request, "auctions/categories.html", {
+        "watchlist_count": request.user.watchlist.all().count()
+    })
 
 
 def login_view(request):
@@ -228,3 +263,6 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+def error(request):
+    return render(request, "auctions/error.html")

@@ -18,7 +18,11 @@
                 <div class="right_container">
                     <div class="details">
                         <h2>{{ listing.title }}</h2>
-                        <h3>Price: Add Bid Later</h3>
+                        {% for bid in bids %}
+                            {% if bid.target_listing.id == listing.id %}
+                                <h3>Price: ${{ bid.current_bid }}</h3>
+                            {% endif %}
+                        {% endfor %}
                         <div class="date">Posted on {{ listing.creation_date }}</div>
                     </div>
                 </div>

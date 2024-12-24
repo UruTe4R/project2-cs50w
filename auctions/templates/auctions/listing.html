@@ -2,7 +2,7 @@
 
 {% block body %}
   <h1>Listing: {{ listing.title }}</h1>
-  <form action="{% url 'toggle_watchlist' listing_id=listing.id%}" method="post">
+  <form action="{% url 'toggle_watchlist' listing_id=listing.id %}" method="post">
     {% csrf_token %}
     {% if listing_presence %}
       <input class="listing_on watchlist_button" type="submit" value="Watchlist">
@@ -11,6 +11,10 @@
       <input class="listing_off watchlist_button" type="submit" value="Watchlist">
       <p>removed</p>
     {% endif %}
-    </form>
+  </form>
 
+  <img class="listing_image" src="{{ listing.image_path.url }}" alt="{{ listing.title }}">
+  <h4>{{ listing.description }}</h4>
+
+  <h1>${{ latest_bid.current_bid }}</h1>
 {% endblock %}

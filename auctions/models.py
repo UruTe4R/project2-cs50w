@@ -14,7 +14,7 @@ class User(AbstractUser):
 class Bid(models.Model):
     target_listing = models.ForeignKey('Listing', on_delete=models.CASCADE, related_name='target')
 
-    bidder = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bidder')
+    bidder = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bidder', blank=True)
 
     first_bid = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -23,7 +23,7 @@ class Bid(models.Model):
     bid_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"seller: {self.seller}, bidder: {self.bidder}, first_bid: {self.first_bid}, current_bid: {self.current_bid}, active: {self.active}, creation_date: {self.creation_date}"
+        return  f"bidder: {self.bidder}, first_bid: {self.first_bid}, current_bid: {self.current_bid}"
 
 class Categories(models.Model):
     category = models.CharField(default="Else", max_length=64, unique=True)
