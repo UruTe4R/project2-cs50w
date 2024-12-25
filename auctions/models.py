@@ -16,7 +16,7 @@ class Bid(models.Model):
 
     bidder = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bidder', blank=True)
 
-    first_bid = models.DecimalField(max_digits=10, decimal_places=2)
+    first_bid = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     current_bid = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -24,6 +24,23 @@ class Bid(models.Model):
 
     def __str__(self):
         return  f"bidder: {self.bidder}, first_bid: {self.first_bid}, current_bid: {self.current_bid}"
+    
+    def is_valid_bid(self, listing):
+        """
+        Validate the bid:
+        1. Ensure the bid is positive.
+        2. Ensure the bid is greater than the latest bid.
+        """
+        if self.current_bid <= 0:
+            return False
+
+        latest_bid = Bid.objects.filter(target_listing=listing).order_by("-bid_date").first()
+        print("latest_bid:", latest_bid.current_bid)
+        print("current_bid:", self.current_bid)
+        if latest_bid and self.current_bid <= latest_bid.current_bid:
+            return False
+        return True
+
 
 class Categories(models.Model):
     category = models.CharField(default="Else", max_length=64, unique=True)

@@ -13,6 +13,7 @@ from PIL import Image
 from django.conf import settings
 import os
 
+
 from .models import User, Listing, Bid, Comment, Reply, Categories
 
 """ 
@@ -37,7 +38,19 @@ from .models import User, Listing, Bid, Comment, Reply, Categories
     implement listing especially bids
 """
 
+class BidForm(forms.ModelForm):
+    class Meta:
+        model = Bid
+        fields = ['current_bid']
+        labels = {"current_bid": ""}
+        widgets = {
+            "current_bid": forms.TextInput(attrs={
+                'class': 'bid_input',
+                'placeholder': 'Bid'
+            })
+        }
 
+        
 
 class ListingForm(forms.ModelForm):
     class Meta:
@@ -49,7 +62,6 @@ class ListingForm(forms.ModelForm):
                  "image_URL": "Image URL"
                  }
 
-        first_price = forms.DecimalField(max_digits=10, decimal_places=2)
 
     def clean_first_price(self):
         """
@@ -109,13 +121,18 @@ def index(request):
         # get all listings and order by creation date desc with "-"
         listings = Listing.objects.all().order_by("-creation_date")
         bids = Bid.objects.all().order_by("-bid_date")
+        latest_bids = []
+        for listing in listings:
+            latest_bid = Bid.objects.filter(target_listing=listing).order_by("-bid_date").first()
+            latest_bids.append(latest_bid)
+
         if request.user.is_authenticated:
             watchlist_count = request.user.watchlist.all().count()
         else:
             return HttpResponseRedirect(reverse("login"))
         return render(request, "auctions/index.html", {
             "listings": listings,
-            "bids": bids,
+            "latest_bids": latest_bids,
             "watchlist_count": watchlist_count
         })
 
@@ -158,21 +175,63 @@ def add_watchlist(request, listing_id):
 
 @login_required
 def listing(request, listing_id):
-    if request.method == "POST":
-        ...
+    listing = Listing.objects.filter(pk=listing_id).first()
+    listing_presence = request.user.watchlist.filter(pk=listing_id).exists()
+    Listing_category = Categories.objects.filter(category=listing.category_name).first()
+    watchlist_count = request.user.watchlist.all().count()
+    latest_bid = Bid.objects.filter(target_listing=listing).order_by("-bid_date").first()
+    if latest_bid.bidder == request.user:
+        is_bidder = True
     else:
-        
-        if (listing := Listing.objects.filter(pk=listing_id)):
-            listing = listing.first()
-            listing_presence = request.user.watchlist.filter(pk=listing_id).exists()
-            watchlist_count = request.user.watchlist.all().count()
-            latest_bid = Bid.objects.filter(target_listing=listing).order_by("-bid_date").first()
+        is_bidder = False
+    bid_count = Bid.objects.filter(target_listing=listing).count()
 
+    if request.method == "POST":
+        form = BidForm(request.POST)
+        if not form.is_valid():
             return render(request, "auctions/listing.html", {
                 "listing": listing,
                 "listing_presence": listing_presence,
                 "watchlist_count": watchlist_count,
-                "latest_bid": latest_bid
+                "latest_bid": latest_bid,
+                "is_bidder": is_bidder,
+                "bid_count": bid_count,
+                "listing_category": Listing_category,
+                "form": form
+            })
+        bid = form.save(commit=False)
+        bid.target_listing = listing
+        bid.bidder = request.user
+        if not bid.is_valid_bid(listing):
+            return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "listing_presence": listing_presence,
+                "watchlist_count": watchlist_count,
+                "latest_bid": latest_bid,
+                "is_bidder": is_bidder,
+                "bid_count": bid_count,
+                "listing_category": Listing_category,
+                "form": form,
+                "invalid_bid": True
+            })
+        bid.save()
+        
+           
+        return HttpResponseRedirect(reverse("listing", args=[listing_id]))
+
+    else:
+        if listing:
+            form = BidForm()
+            print("listing:", listing)
+            return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "listing_presence": listing_presence,
+                "watchlist_count": watchlist_count,
+                "latest_bid": latest_bid,
+                "is_bidder": is_bidder,
+                "bid_count": bid_count,
+                "listing_category": Listing_category,
+                "form": form
             })
         else:
             return render(request, "auctions/error.html", {

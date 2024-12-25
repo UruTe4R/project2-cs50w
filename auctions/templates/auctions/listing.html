@@ -1,15 +1,14 @@
 {% extends 'auctions/layout.html' %}
 
 {% block body %}
+<div class="listing_body">
   <h1>Listing: {{ listing.title }}</h1>
   <form action="{% url 'toggle_watchlist' listing_id=listing.id %}" method="post">
     {% csrf_token %}
     {% if listing_presence %}
       <input class="listing_on watchlist_button" type="submit" value="Watchlist">
-      <p>added</p>
     {% else %}
       <input class="listing_off watchlist_button" type="submit" value="Watchlist">
-      <p>removed</p>
     {% endif %}
   </form>
 
@@ -17,4 +16,31 @@
   <h4>{{ listing.description }}</h4>
 
   <h1>${{ latest_bid.current_bid }}</h1>
+  {% if is_bidder %}
+    <p>{{ bid_count }} bid(s) so far. Your bid is the current bid.</p>
+  {% else %}
+    <p>{{ bid_count }} bid(s) so far. Someone else is the current bidder.</p>
+  {% endif %}
+  <form action="{% url 'listing' listing_id=listing.id %}" method="post">
+    {% csrf_token %}
+    {{ form.as_table }}
+    <input class="btn btn-primary" type="submit" value="Place Bid">
+  </form>
+  {% if invalid_bid %}
+    <div class="invalid_bid">
+      Invalid Bid
+    </div>
+  {% endif %}
+
+  <h2>Details</h2>
+  <ul>
+    <li>Listed by: {{ listing.owner.username }}</li>
+    {% if Listing_category %}
+    <li>Category: {{ listing_category }} </li>
+    {% else %}
+    <li>Category: No Category Listed</li>
+    {% endif %}
+  </ul>
+</div>
+ 
 {% endblock %}

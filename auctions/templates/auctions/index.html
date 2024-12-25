@@ -18,7 +18,7 @@
                 <div class="right_container">
                     <div class="details">
                         <h2>{{ listing.title }}</h2>
-                        {% for bid in bids %}
+                        {% for bid in latest_bids %}
                             {% if bid.target_listing.id == listing.id %}
                                 <h3>Price: ${{ bid.current_bid }}</h3>
                             {% endif %}
