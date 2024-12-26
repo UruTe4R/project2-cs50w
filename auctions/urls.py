@@ -12,6 +12,7 @@ urlpatterns = [
     path("watchlist", views.watchlist, name="watchlist"),
     path("add_listing", views.add_listing, name="add_listing"),
     path("categories", views.categories, name="categories"),
+    path("category/<str:category_name>", views.category, name="category"),
     path("listing/<int:listing_id>", views.listing, name="listing"),
     path("watchlist/toggle/<int:listing_id>", views.add_watchlist, name="toggle_watchlist"),
     path("error", views.error, name="error"),

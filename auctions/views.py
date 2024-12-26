@@ -134,7 +134,6 @@ def index(request):
     else:
         # get all listings and order by creation date desc with "-"
         listings = Listing.objects.all().order_by("-creation_date")
-        bids = Bid.objects.all().order_by("-bid_date")
         latest_bids = []
         for listing in listings:
             latest_bid = Bid.objects.filter(target_listing=listing).order_by("-bid_date").first()
@@ -340,10 +339,28 @@ def add_comments(request, listing_id):
 
 @login_required
 def categories(request):
+    categories = Categories.objects.all()
     return render(request, "auctions/categories.html", {
-        "watchlist_count": request.user.watchlist.all().count()
+        "watchlist_count": request.user.watchlist.all().count(),
+        "categories": categories
     })
 
+@login_required
+def category(request, category_name):
+    category = Categories.objects.filter(category=category_name).first()
+    category_items = Listing.objects.filter(category_name=category)
+    latest_bids = []
+    for listing in category_items:
+        latest_bid = Bid.objects.filter(target_listing=listing).order_by("-bid_date").first()
+        latest_bids.append(latest_bid)
+    print(category_name)
+    print(category_items)
+    return render(request, "auctions/category.html", {
+        "watchlist_count": request.user.watchlist.all().count(),
+        "category_name": category_name,
+        "listings": category_items,
+        "latest_bids": latest_bids,
+    })
 
 def login_view(request):
     if request.method == "POST":
