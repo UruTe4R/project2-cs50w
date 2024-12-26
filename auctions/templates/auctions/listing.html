@@ -11,7 +11,7 @@
       <input class="listing_off watchlist_button" type="submit" value="Watchlist">
     {% endif %}
   </form>
-
+<!-- listing discription -->
   <img class="listing_image" src="{{ listing.image_path.url }}" alt="{{ listing.title }}">
   <h4>{{ listing.description }}</h4>
 
@@ -21,6 +21,7 @@
   {% else %}
     <p>{{ bid_count }} bid(s) so far. Someone else is the current bidder.</p>
   {% endif %}
+  <!-- bid form -->
   <form action="{% url 'listing' listing_id=listing.id %}" method="post">
     {% csrf_token %}
     {{ form.as_table }}
@@ -31,7 +32,7 @@
       Invalid Bid
     </div>
   {% endif %}
-
+<!-- details -->
   <h2>Details</h2>
   <ul>
     <li>Listed by: {{ listing.owner.username }}</li>
@@ -41,6 +42,30 @@
     <li>Category: No Category Listed</li>
     {% endif %}
   </ul>
+<!-- comment field -->
+  <div class="comment_body">
+    <form action="{% url 'add_comments' listing_id=listing.id%}" method="post">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <input class="btn btn-primary" type="submit" value="Add Comment">
+    </form>
+  </div>
+
 </div>
+
+
  
+<div class="comment_section">
+  {% for comment in comments %}
+  <div class="comment_card">
+    
+    <div class="comment_header">
+      <div class="writer">{{ comment.writer.username }}</div>
+      <div class="date">{{ comment.comment_date }}</div>
+    </div>
+    
+    <div class="comment">{{ comment.comment }}</div>
+  </div>
+  {% endfor %}
+</div>
 {% endblock %}

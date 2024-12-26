@@ -36,12 +36,26 @@ from .models import User, Listing, Bid, Comment, Reply, Categories
     finished listing's price in listing.html 
     2025-12-25
     implement listing especially bids
+    2025-12-26
+    implement categories
+    maybe implement comment and reply
 """
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['comment']
+        labels = {'comment': ''}
+        comment = forms.CharField(widget=forms.Textarea(attrs={
+            'class': 'comment_input',
+            'placeholder': 'Comment',
+            'max_length': 500
+        }))
 
 class BidForm(forms.ModelForm):
     class Meta:
         model = Bid
-        fields = ['current_bid']
+        fields = ["current_bid"]
         labels = {"current_bid": ""}
         widgets = {
             "current_bid": forms.TextInput(attrs={
@@ -176,10 +190,19 @@ def add_watchlist(request, listing_id):
 @login_required
 def listing(request, listing_id):
     listing = Listing.objects.filter(pk=listing_id).first()
+
+    comment_form = CommentForm()
+
     listing_presence = request.user.watchlist.filter(pk=listing_id).exists()
+
     Listing_category = Categories.objects.filter(category=listing.category_name).first()
+
     watchlist_count = request.user.watchlist.all().count()
+
     latest_bid = Bid.objects.filter(target_listing=listing).order_by("-bid_date").first()
+
+    comments = list(Comment.objects.filter(listing_id=listing_id).order_by("-comment_date"))
+    print(comments)
     if latest_bid.bidder == request.user:
         is_bidder = True
     else:
@@ -197,7 +220,9 @@ def listing(request, listing_id):
                 "is_bidder": is_bidder,
                 "bid_count": bid_count,
                 "listing_category": Listing_category,
-                "form": form
+                "form": form,
+                "comment_form": comment_form,
+                "comments": comments
             })
         bid = form.save(commit=False)
         bid.target_listing = listing
@@ -212,7 +237,9 @@ def listing(request, listing_id):
                 "bid_count": bid_count,
                 "listing_category": Listing_category,
                 "form": form,
-                "invalid_bid": True
+                "invalid_bid": True,
+                "comment_form": comment_form,
+                "comments": comments
             })
         bid.save()
         
@@ -231,7 +258,9 @@ def listing(request, listing_id):
                 "is_bidder": is_bidder,
                 "bid_count": bid_count,
                 "listing_category": Listing_category,
-                "form": form
+                "form": form,
+                "comment_form": comment_form,
+                "comments": comments
             })
         else:
             return render(request, "auctions/error.html", {
@@ -264,6 +293,50 @@ def add_listing(request):
             "form": listing_form,
             "watchlist_count": request.user.watchlist.all().count()
         })
+@login_required
+def add_comments(request, listing_id):
+    listing = Listing.objects.filter(pk=listing_id).first()
+
+    comment_form = CommentForm()
+
+    listing_presence = request.user.watchlist.filter(pk=listing_id).exists()
+
+    Listing_category = Categories.objects.filter(category=listing.category_name).first()
+
+    watchlist_count = request.user.watchlist.all().count()
+
+    latest_bid = Bid.objects.filter(target_listing=listing).order_by("-bid_date").first()
+
+    if latest_bid.bidder == request.user:
+        is_bidder = True
+    else:
+        is_bidder = False
+    bid_count = Bid.objects.filter(target_listing=listing).count()
+
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        print("comment:", request.POST)
+        if not form.is_valid():
+            return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "listing_presence": listing_presence,
+                "watchlist_count": watchlist_count,
+                "latest_bid": latest_bid,
+                "is_bidder": is_bidder,
+                "bid_count": bid_count,
+                "listing_category": Listing_category,
+                "form": form,
+                "invalid_bid": True,
+                "comment_form": comment_form
+            })
+        comment = form.save(commit=False)
+        comment.listing_id = listing
+        comment.writer = request.user
+        print(listing)
+        print(request.user)
+        comment.save()
+        return HttpResponseRedirect(reverse("listing", args=[listing_id]))
+
 
 @login_required
 def categories(request):

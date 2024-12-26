@@ -90,8 +90,63 @@ img {
 
 .listing_body {
     margin-left: 20px;
+    width: 50%
 }
+.listingbody form, 
 
 .invalid_bid {
     color: red;
+}
+
+.comment_section {
+    position: absolute;
+    top: 150px;
+    right: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: scroll;
+}
+
+.comment_card{
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+    border-radius: 5px;
+    width: 500px;
+    height: 200px;
+}
+
+.comment_header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.writer {
+    font-weight: bold;
+    font-size: 2rem;
+    margin-left: 10px;
+}
+
+.date {
+    color: rgba(119, 118, 118, 0.5);
+    margin-right: 10px;
+}
+
+.comment {
+    margin-left: 20px;
+    font-size: 1.5rem;
+
+}
+
+.commnet_body {
+    margin-left: 20px;
+    font-size: 2rem;
+}
+
+.comment_input {
+    width: 500px;
+    border-radius: 5px;
 }
