@@ -16,7 +16,9 @@
     {% endif %}
     {% else %}
     <h2 class="inactive">INACTIVE</h2>
-    <p>someone else is the winner of this listing!</p>
+      {% if is_winner %}
+      <h3>{{ latest_bid.bidder.username }}, You won this listing!</h3>
+      {% endif %}
     {% endif %}
   </div>
 

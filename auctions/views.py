@@ -218,6 +218,9 @@ def listing(request, listing_id):
         is_bidder = False
     bid_count = Bid.objects.filter(target_listing=listing).count()
 
+    # if latest bidder is the current user and listing is not active, then is_winner
+    is_winner = True if latest_bid.bidder == request.user and listing.active == False else False
+
     if request.method == "POST":
         form = BidForm(request.POST)
         if not form.is_valid():
@@ -232,7 +235,8 @@ def listing(request, listing_id):
                 "form": form,
                 "comment_form": comment_form,
                 "comments": comments,
-                "is_owner": is_owner
+                "is_owner": is_owner,
+                "is_winner": is_winner
             })
         bid = form.save(commit=False)
         bid.target_listing = listing
@@ -250,7 +254,8 @@ def listing(request, listing_id):
                 "invalid_bid": True,
                 "comment_form": comment_form,
                 "comments": comments,
-                "is_owner": is_owner
+                "is_owner": is_owner,
+                "is_winner": is_winner
             })
         bid.save()
         
@@ -272,7 +277,8 @@ def listing(request, listing_id):
                 "form": form,
                 "comment_form": comment_form,
                 "comments": comments,
-                "is_owner": is_owner
+                "is_owner": is_owner,
+                "is_winner": is_winner
             })
         else:
             return render(request, "auctions/error.html", {
@@ -344,6 +350,8 @@ def close_listing(request, listing_id):
         is_bidder = False
     bid_count = Bid.objects.filter(target_listing=listing).count()
 
+    is_winner = True if latest_bid.bidder == request.user and listing.active == False else False
+
     if not listing:
         return HttpResponseRedirect(reverse("error"))
     if request.method == "POST":
@@ -362,7 +370,8 @@ def close_listing(request, listing_id):
                 "listing_category": Listing_category,
                 "comment_form": comment_form,
                 "comments": comments,
-                "is_owner": is_owner
+                "is_owner": is_owner,
+                "is_winner": is_winner
             })
 
 @login_required
@@ -385,6 +394,8 @@ def add_comments(request, listing_id):
         is_bidder = False
     bid_count = Bid.objects.filter(target_listing=listing).count()
 
+    is_winner = True if latest_bid.bidder == request.user and listing.active == False else False
+
     if request.method == "POST":
         form = CommentForm(request.POST)
         print("comment:", request.POST)
@@ -399,7 +410,8 @@ def add_comments(request, listing_id):
                 "listing_category": Listing_category,
                 "form": form,
                 "invalid_bid": True,
-                "comment_form": comment_form
+                "comment_form": comment_form,
+                "is_winner": is_winner
             })
         comment = form.save(commit=False)
         comment.listing_id = listing
