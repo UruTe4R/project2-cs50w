@@ -3,6 +3,24 @@
 {% block body %}
 <div class="listing_body">
   <h1>Listing: {{ listing.title }}</h1>
+
+<!-- close button -->
+ <div class="close_button_container">
+   {% if listing.active %}
+   <h2 class="active">ACTIVE</h2>
+   {% if is_owner %}
+   <form action="{% url 'close_listing' listing_id=listing.id %}" method="post">
+     {% csrf_token %}
+     <input type="submit" class="close_listing_button" value="Close Listing">
+    </form>
+    {% endif %}
+    {% else %}
+    <h2 class="inactive">INACTIVE</h2>
+    <p>someone else is the winner of this listing!</p>
+    {% endif %}
+  </div>
+
+<!-- watchlist button -->
   <form action="{% url 'toggle_watchlist' listing_id=listing.id %}" method="post">
     {% csrf_token %}
     {% if listing_presence %}
@@ -12,7 +30,11 @@
     {% endif %}
   </form>
 <!-- listing discription -->
+  {% if listing.image_path %}
   <img class="listing_image" src="{{ listing.image_path.url }}" alt="{{ listing.title }}">
+  {% else %}
+  <img class="listing_image" src="{{ listing.image_URL }}" alt="{{ listing.title }}">
+  {% endif %}
   <h4>{{ listing.description }}</h4>
 
   <h1>${{ latest_bid.current_bid }}</h1>
@@ -34,7 +56,7 @@
   {% endif %}
 <!-- details -->
   <h2>Details</h2>
-  <ul>
+  <ul class="listing_details">
     <li>Listed by: {{ listing.owner.username }}</li>
     {% if Listing_category %}
     <li>Category: {{ listing_category }} </li>
@@ -43,6 +65,7 @@
     {% endif %}
   </ul>
 <!-- comment field -->
+ <h2>Comments</h2>
   <div class="comment_body">
     <form action="{% url 'add_comments' listing_id=listing.id%}" method="post">
       {% csrf_token %}
@@ -54,8 +77,9 @@
 </div>
 
 
- 
+
 <div class="comment_section">
+  {% if comments %}
   {% for comment in comments %}
   <div class="comment_card">
     
@@ -67,5 +91,8 @@
     <div class="comment">{{ comment.comment }}</div>
   </div>
   {% endfor %}
+  {% else %}
+      No comments yet.
+  {% endif %}
 </div>
 {% endblock %}

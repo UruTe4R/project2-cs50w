@@ -86,7 +86,15 @@ class ListingForm(forms.ModelForm):
             raise forms.ValidationError("Price must be positive value.")
         return price
     
+
     def clean_image_path(self):
+        """
+        set image size to fixed width * size
+
+        i implemented this to change the bytes of original image
+        so that it is more sustainable
+        but i figured i do not need this because i might wanna make image bigger in listing...
+        """
         print("clean_image_path called")
         # check if image is uploaded
         if not (uploaded_file := self.cleaned_data["image_path"]):
@@ -190,6 +198,8 @@ def add_watchlist(request, listing_id):
 def listing(request, listing_id):
     listing = Listing.objects.filter(pk=listing_id).first()
 
+    is_owner = True if listing.owner == request.user else False
+
     comment_form = CommentForm()
 
     listing_presence = request.user.watchlist.filter(pk=listing_id).exists()
@@ -221,7 +231,8 @@ def listing(request, listing_id):
                 "listing_category": Listing_category,
                 "form": form,
                 "comment_form": comment_form,
-                "comments": comments
+                "comments": comments,
+                "is_owner": is_owner
             })
         bid = form.save(commit=False)
         bid.target_listing = listing
@@ -238,7 +249,8 @@ def listing(request, listing_id):
                 "form": form,
                 "invalid_bid": True,
                 "comment_form": comment_form,
-                "comments": comments
+                "comments": comments,
+                "is_owner": is_owner
             })
         bid.save()
         
@@ -259,7 +271,8 @@ def listing(request, listing_id):
                 "listing_category": Listing_category,
                 "form": form,
                 "comment_form": comment_form,
-                "comments": comments
+                "comments": comments,
+                "is_owner": is_owner
             })
         else:
             return render(request, "auctions/error.html", {
@@ -271,7 +284,14 @@ def listing(request, listing_id):
 @login_required
 def add_listing(request):
     if request.method == "POST":
-        form = ListingForm(request.POST, request.FILES)
+        if request.FILES:
+            form = ListingForm(request.POST, request.FILES)
+        elif request.POST["image_URL"]:
+            form = ListingForm(request.POST)
+        else:
+            form = ListingForm(request.POST)
+       
+        print("request.POST:", request.POST)
         print("request.FILES:", request.FILES)
         # is form valid?
         if not form.is_valid():
@@ -282,6 +302,11 @@ def add_listing(request):
         #save to database, w/owner
         listing = form.save(commit=False)
         listing.owner = request.user
+
+        # Fallback to default image if neither ImageField nor URLField given
+        if not listing.image_path and not listing.image_URL:
+            listing.image_path = "error.png"
+
         listing.save()
         Bid.objects.create(target_listing=listing, bidder=request.user, first_bid=listing.first_price, current_bid=listing.first_price)
         print(f"Image path: {os.path.join(settings.MEDIA_ROOT, listing.image_path.name)}")
@@ -292,6 +317,54 @@ def add_listing(request):
             "form": listing_form,
             "watchlist_count": request.user.watchlist.all().count()
         })
+    
+@login_required
+def close_listing(request, listing_id):
+    listing = Listing.objects.filter(pk=listing_id).first()
+
+    is_owner = True if listing.owner == request.user else False
+
+    comment_form = CommentForm()
+
+    listing_presence = request.user.watchlist.filter(pk=listing_id).exists()
+
+    Listing_category = Categories.objects.filter(category=listing.category_name).first()
+
+    watchlist_count = request.user.watchlist.all().count()
+
+    latest_bid = Bid.objects.filter(target_listing=listing).order_by("-bid_date").first()
+
+    comments = list(Comment.objects.filter(listing_id=listing_id).order_by("-comment_date"))
+
+    listing = Listing.objects.filter(pk=listing_id).first()
+
+    if latest_bid.bidder == request.user:
+        is_bidder = True
+    else:
+        is_bidder = False
+    bid_count = Bid.objects.filter(target_listing=listing).count()
+
+    if not listing:
+        return HttpResponseRedirect(reverse("error"))
+    if request.method == "POST":
+        if listing.owner == request.user:
+            listing.active = False
+            listing.save()
+            return HttpResponseRedirect(reverse("index"))
+        else:
+            return render(request, "auctions/error.html", {
+                "listing": listing,
+                "listing_presence": listing_presence,
+                "watchlist_count": watchlist_count,
+                "latest_bid": latest_bid,
+                "is_bidder": is_bidder,
+                "bid_count": bid_count,
+                "listing_category": Listing_category,
+                "comment_form": comment_form,
+                "comments": comments,
+                "is_owner": is_owner
+            })
+
 @login_required
 def add_comments(request, listing_id):
     listing = Listing.objects.filter(pk=listing_id).first()
@@ -340,9 +413,15 @@ def add_comments(request, listing_id):
 @login_required
 def categories(request):
     categories = Categories.objects.all()
+    for cat in categories:
+        print(cat.category)
+        print(type(cat.category))
+    cat_count = {category.category: Listing.objects.filter(category_name=category).count() for category in categories}
+    print(cat_count)
     return render(request, "auctions/categories.html", {
         "watchlist_count": request.user.watchlist.all().count(),
-        "categories": categories
+        "categories": categories,
+        "cat_count": cat_count
     })
 
 @login_required

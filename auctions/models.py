@@ -55,7 +55,7 @@ class Listing(models.Model):
 
     description = models.TextField(max_length=500)
 
-    image_path = models.ImageField(default="error.png", blank=True)
+    image_path = models.ImageField(blank=True)
 
     image_URL = models.URLField(blank=True)
 

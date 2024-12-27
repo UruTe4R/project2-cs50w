@@ -2,10 +2,10 @@
 
 {% block body %}
 <div class="body">
-  {% for cat in categories %}
-  <a href="{% url 'category' category_name=cat.category %}">
+  {% for key, value in cat_count.items %}
+  <a href="{% url 'category' category_name=key %}">
     <h1>
-      {{ cat.category }}
+      {{ key }} ({{ value }})
     </h1>
   </a>
   {% endfor %}

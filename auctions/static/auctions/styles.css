@@ -50,7 +50,7 @@ img {
 }
 
 .right_container {
-    max-width: ;
+    max-width: 700px;
     flex-grow: 1;
     text-decoration: none;
     color: black;
@@ -79,7 +79,7 @@ img {
 }
 
 .bid_input {
-    width: 200px;
+    width: 320px;
     padding: 5px;
     border-radius: 5px;
 
@@ -92,7 +92,9 @@ img {
     margin-left: 20px;
     width: 50%
 }
-.listingbody form, 
+.listing_details {
+    margin-left: 20px;
+}
 
 .invalid_bid {
     color: red;
@@ -105,7 +107,14 @@ img {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    overflow: scroll;
+}
+@media (max-width: 1200px){
+    .comment_section {
+        position: static;
+        margin-top: 20px;
+        right: auto;
+        top: auto;
+    }
 }
 
 .comment_card{
@@ -149,4 +158,27 @@ img {
 .comment_input {
     width: 500px;
     border-radius: 5px;
+}
+
+.close_button_container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+.active {
+    color: green;
+}
+.inactive {
+    color: gray;
+}
+
+
+.close_listing_button {
+    background-color: rgba(119, 118, 118, 0.5);
+    border-radius: 5px;
+    font-weight: bold;
+    padding: 5px;
+
 }
