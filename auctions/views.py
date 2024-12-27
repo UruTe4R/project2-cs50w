@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django import forms
+from django.db.models import Q
 # for image resizing
 from io import BytesIO
 from django.core.files.base import ContentFile
@@ -428,7 +429,7 @@ def categories(request):
     for cat in categories:
         print(cat.category)
         print(type(cat.category))
-    cat_count = {category.category: Listing.objects.filter(category_name=category).count() for category in categories}
+    cat_count = {category.category: Listing.objects.filter(Q(category_name=category) & Q(active=True)).count() for category in categories}
     print(cat_count)
     return render(request, "auctions/categories.html", {
         "watchlist_count": request.user.watchlist.all().count(),
